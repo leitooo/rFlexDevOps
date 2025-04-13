@@ -1,29 +1,22 @@
-FROM php:8.1-apache
+FROM php:8.1-apache-bullseye
 
-# Actualizar repositorios e instalar dependencias del sistema
+# Actualiza repositorios e instala dependencias necesarias
 RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libzip-dev \
     zip \
     unzip \
     git \
-  && docker-php-ext-configure zip \
   && docker-php-ext-install pdo pdo_mysql mbstring zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copiar Composer desde la imagen oficial de Composer
+# Copiar Composer desde la imagen oficial
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Establecer el directorio de trabajo
 WORKDIR /var/www/html
-
-# Copiar el contenido del proyecto (asegúrate de que este Dockerfile esté en mi-proyecto)
 COPY . .
 
-# Instalar dependencias de PHP (Laravel)
 RUN composer install --no-dev --optimize-autoloader
-
-# Ajustar permisos a storage y bootstrap/cache
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
