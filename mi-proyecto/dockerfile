@@ -1,22 +1,33 @@
 FROM php:8.1-apache
 
+# Actualizar e instalar las dependencias del sistema necesarias.
+# En PHP 8.1, la instalación de la extensión zip suele funcionar bien con libzip-dev sin necesidad de configure extra.
 RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libzip-dev \
     zip \
     unzip \
     git \
-  && docker-php-ext-configure zip --with-libzip \
-  && docker-php-ext-install pdo pdo_mysql mbstring zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Instalar extensiones PHP necesarias.
+RUN docker-php-ext-install pdo pdo_mysql mbstring zip
+
+# Copiar Composer desde la imagen oficial de Composer.
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# Establecer el directorio de trabajo.
 WORKDIR /var/www/html
+
+# Copiar el código del proyecto al contenedor.
 COPY . .
 
+# Instalar dependencias de Laravel.
 RUN composer install --no-dev --optimize-autoloader
+
+# Ajustar permisos en las carpetas storage y bootstrap/cache.
 RUN chown -R www-data:www-data storage bootstrap/cache
 
 EXPOSE 80
+
 CMD ["apache2-foreground"]
