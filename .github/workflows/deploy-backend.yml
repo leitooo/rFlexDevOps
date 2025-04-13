@@ -70,6 +70,7 @@ jobs:
           cd mi-proyecto
           docker build -t backend-app:latest .
 
+
       # Desplegar a producción mediante SSH y Docker Compose
       - name: Desplegar a producción
         env:
