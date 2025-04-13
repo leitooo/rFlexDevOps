@@ -1,28 +1,37 @@
-FROM php:8.1-apache
+# Utiliza PHP 8.1 con Apache como base
+FROM php:8.1.13-apache-bullseye
 
 # Instalar dependencias del sistema
+# - libzip-dev y zlib1g-dev son clave para la extensión zip
+# - libpng-dev es comúnmente necesario si usas gd
 RUN apt-get update && apt-get install -y \
+    zlib1g-dev \
     libzip-dev \
+    libpng-dev \
     zip \
     unzip \
     git \
+  && docker-php-ext-configure zip \
   && docker-php-ext-install pdo pdo_mysql mbstring zip \
   && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copiar Composer desde su imagen oficial (opcional)
+# Copiar Composer (opcional, evita instalar Composer manualmente)
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Definir el directorio de trabajo
+# Define el directorio de trabajo
 WORKDIR /var/www/html
 
-# Copiar el contenido del proyecto
+# Copia todo el código del proyecto al contenedor
 COPY . .
 
-# Instalar dependencias de Laravel (sin dev, si así lo deseas)
+# Instalar dependencias de Laravel sin ambiente de desarrollo (opcional)
 RUN composer install --no-dev --optimize-autoloader
 
-# Ajustar permisos
+# Ajustar permisos de storage y bootstrap/cache si es necesario
 RUN chown -R www-data:www-data storage bootstrap/cache
 
+# Exponer el puerto 80 (Apache)
 EXPOSE 80
+
+# Comando por defecto de Apache
 CMD ["apache2-foreground"]
