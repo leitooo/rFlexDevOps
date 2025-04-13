@@ -10,11 +10,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Clonar el repositorio para trabajar con la versión actualizada del código
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      # Listar archivos en la raíz para verificar la estructura (debe incluir la carpeta 'mi-proyecto')
+      # Listar archivos en la raíz para verificar la estructura, esto para ver los logs más detalladamente
       - name: Listar archivos en la raíz
         run: ls -la
 
@@ -25,7 +24,7 @@ jobs:
           php-version: '8.1'
           extensions: mbstring, xml, pdo_mysql
 
-      # Cambiar al directorio 'mi-proyecto' e instalar las dependencias con Composer
+      #instalar las dependencias con Composer
       - name: Instalar dependencias de PHP en mi-proyecto
         run: |
           cd mi-proyecto
@@ -71,7 +70,7 @@ jobs:
           ls -la  # Opcional: para confirmar que el Dockerfile está presente
           docker build -t backend-app:latest .
 
-
+          
       # Desplegar a producción mediante SSH y Docker Compose
       - name: Desplegar a producción
         env:
@@ -83,4 +82,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > key.pem
           chmod 600 key.pem
           # Conectar via SSH y ejecutar el despliegue
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=600 -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && docker-compose down && docker-compose up -d --build"
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=300 -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && docker-compose down && docker-compose up -d --build"
