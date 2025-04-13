@@ -83,4 +83,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" > key.pem
           chmod 600 key.pem
           # Conectar via SSH y ejecutar el despliegue
-          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=300 -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && docker-compose down && docker-compose up -d --build"
+          ssh -o StrictHostKeyChecking=no -o ConnectTimeout=600 -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && docker-compose down && docker-compose up -d --build"
