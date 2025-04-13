@@ -41,11 +41,22 @@ jobs:
           cd mi-proyecto
           cp .env.example .env
           php artisan key:generate
-
-      - name: Migraciones (si las pruebas las requieren)
+          
+      - name: Configurar .env para pruebas
         run: |
           cd mi-proyecto
-          php artisan migrate --env=testing --force    
+          cp .env.example .env
+          php artisan key:generate
+          # Forzamos DB_CONNECTION a sqlite
+          sed -i 's/DB_CONNECTION=.*/DB_CONNECTION=sqlite/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=:memory:/' .env
+
+      - name: Migraciones y pruebas
+        run: |
+          cd mi-proyecto
+          php artisan migrate --force
+          php artisan test
+  
 
       # Ejecutar los tests del proyecto usando Artisan
       - name: Ejecutar tests con Artisan
