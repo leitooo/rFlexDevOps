@@ -1,0 +1,15 @@
+{
+    "name": "leona/r-flex-dev-ops",
+    "autoload": {
+        "psr-4": {
+            "Leona\\RFlexDevOps\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Leonardo Quezada",
+            "email": "72825392+leitooo@users.noreply.github.com"
+        }
+    ],
+    "require": {}
+}
