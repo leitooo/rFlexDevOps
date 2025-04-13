@@ -1,6 +1,5 @@
 name: Backend Deployment Pipeline
 
-# Se activa con cada push a la rama principal, asegurando que todos los cambios pasen por el proceso
 on:
   push:
     branches:
@@ -11,38 +10,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Clona el repositorio para trabajar con la versión actualizada del código
+      # Clonar el repositorio para trabajar con la versión actualizada del código
       - name: Clonar repositorio
         uses: actions/checkout@v3
 
-      # Configura el entorno PHP, estableciendo la versión (por ejemplo, 8.1) y las extensiones necesarias
+      # Listar archivos en la raíz para verificar la estructura (debe incluir la carpeta 'mi-proyecto')
+      - name: Listar archivos en la raíz
+        run: ls -la
+
+      # Configurar el entorno PHP, estableciendo la versión y las extensiones necesarias
       - name: Configurar PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
           extensions: mbstring, xml, pdo_mysql
 
-      # Instala las dependencias del proyecto utilizando Composer
-      - name: Instalar dependencias de PHP
-        run: composer install --prefer-dist --no-progress --no-suggest
+      # Cambiar al directorio 'mi-proyecto' e instalar las dependencias con Composer
+      - name: Instalar dependencias de PHP en mi-proyecto
+        run: |
+          cd mi-proyecto
+          composer install --prefer-dist --no-progress
 
-      # Ejecuta tests para validar que el código funciona correctamente
-      - name: Ejecutar tests
-        run: php artisan test
+      # Listar archivos dentro de 'mi-proyecto' para confirmar que el archivo 'artisan' está presente
+      - name: Listar archivos en 'mi-proyecto'
+        run: |
+          cd mi-proyecto
+          ls -la
 
-      # Construye una imagen Docker para empaquetar la aplicación de forma consistente y reproducible
-      - name: Construir imagen Docker
-        run: docker build -t backend-app:latest .
+      # Ejecutar los tests del proyecto usando Artisan
+      - name: Ejecutar tests con Artisan
+        run: |
+          cd mi-proyecto
+          php artisan test
 
-      # Despliega automáticamente el código a producción mediante SSH y Docker Compose
+      # Construir la imagen Docker dentro del directorio 'mi-proyecto'
+      - name: Construir imagen Docker en mi-proyecto
+        run: |
+          cd mi-proyecto
+          docker build -t backend-app:latest .
+
+      # Desplegar a producción mediante SSH y Docker Compose
       - name: Desplegar a producción
         env:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
         run: |
-          # Guardar la clave privada en un archivo y ajustar permisos
           echo "$SSH_PRIVATE_KEY" > key.pem
           chmod 600 key.pem
-          # Conectar vía SSH al servidor de producción y realizar las operaciones necesarias
           ssh -o StrictHostKeyChecking=no -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && git pull && docker-compose down && docker-compose up -d --build"
