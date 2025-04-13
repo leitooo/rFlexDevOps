@@ -79,6 +79,8 @@ jobs:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_USER: ${{ secrets.SERVER_USER }}
         run: |
+          # Crear el archivo de clave SSH a partir del secreto
           echo "$SSH_PRIVATE_KEY" > key.pem
           chmod 600 key.pem
+          # Conectar via SSH y ejecutar el despliegue
           ssh -o StrictHostKeyChecking=no -i key.pem $SERVER_USER@$SERVER_IP "cd /var/www/backend && docker-compose down && docker-compose up -d --build"
