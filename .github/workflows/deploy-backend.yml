@@ -68,6 +68,7 @@ jobs:
       - name: Construir imagen Docker en mi-proyecto
         run: |
           cd mi-proyecto
+          ls -la  # Opcional: para confirmar que el Dockerfile está presente
           docker build -t backend-app:latest .
 
 
