@@ -36,6 +36,16 @@ jobs:
         run: |
           cd mi-proyecto
           ls -la
+      - name: Copiar .env y generar clave
+        run: |
+          cd mi-proyecto
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Migraciones (si las pruebas las requieren)
+        run: |
+          cd mi-proyecto
+          php artisan migrate --env=testing --force    
 
       # Ejecutar los tests del proyecto usando Artisan
       - name: Ejecutar tests con Artisan
